@@ -1,12 +1,10 @@
-const path = require('path');
+import express from "express";
+import ViteExpress from "vite-express";
 
-const express = require('express');
 const app = express();
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', (req, res, next) => {
-    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+app.get("/message", (req, res) => {
+  res.send("Hello World!");
 });
 
-app.listen(3000);
+ViteExpress.listen(app, 3000, () => console.log("Server is listening..."));
