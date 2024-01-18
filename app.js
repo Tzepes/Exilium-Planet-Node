@@ -22,9 +22,13 @@ app.get("/message", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/parcels", async (req, res) => {
-  const parcels = await ParcelModel.find();
-  res.json(parcels);
+app.get("/getParcels", async (req, res) => {
+  try {
+    const parcels = await ParcelModel.find({});
+    res.json(parcels);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 });
 
 ViteExpress.listen(app, 3000, () => console.log("Server is listening..."));

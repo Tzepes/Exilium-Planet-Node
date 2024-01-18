@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { extend, useLoader, useThree, useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
@@ -8,6 +8,7 @@ import planetGlowVertex from './shaders/planetGlowVertex.glsl'
 import planetGlowFragment from './shaders/planetGlowFragment.glsl'
 import loadingVertex from './shaders/loadingVertex.glsl'
 import loadingFragment from './shaders/loadingFragment.glsl'
+import axios from 'axios'
 
 extend({ OrbitControls: OrbitControls})
 
@@ -17,6 +18,68 @@ extend({ OrbitControls: OrbitControls})
  */
 
 export default function Experience() {
+    //Get Parcels data
+    const [parcelMatrix, setParcelMatrix] = useState([]);
+
+    const totalParcels = 99856;
+    const parcelsPerSide = Math.sqrt(totalParcels);
+
+    const latRange = 180; // from -90 to 90
+    const lonRange = 360; // from -180 to 180
+
+    const latStep = latRange / parcelsPerSide;
+    const lonStep = lonRange / parcelsPerSide;
+
+    function logMatrixByID(flatArray, elementsPerRow) {
+        let matrix = [];
+        for (let i = 0; i < flatArray.length; i += elementsPerRow) {
+          let row = [];
+          for (let j = i; j < i + elementsPerRow; j++) {
+            row.push(`[${flatArray[j].id}]`);
+          }
+          matrix.push(row);
+        }
+        console.log(matrix.map(row => row.join(' ')).join('\n'));
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const getParcels = await axios.get('http://localhost:3000/getParcels');
+                
+                // Create a new matrix filled with null values
+                const newMatrix = new Array(316).fill(null).map(() => new Array(316).fill(null));
+
+                // Iterate over the parcels and set them in the matrix
+                for (const parcel of getParcels.data) {
+                    const [i, j] = parcel.id.split('-').map(Number);
+                    newMatrix[i][j] = parcel;
+                }
+
+                setParcelMatrix(newMatrix);
+                
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        fetchData();
+    }, []);
+
+    // useEffect(() => {
+    //     if (parcelMatrix.length > 0) {
+    //         logMatrixByID(parcelMatrix.flat(), 316);
+    //     }
+    // }, [parcelMatrix]);
+
+    function getClosestParcel(lat, lon) {
+        // Calculate the index of the parcel that should be closest to the given coordinates
+        let i = Math.floor(lat / latStep);
+        let j = Math.floor(lon / lonStep);
+    
+        // Return the parcel at the calculated index
+        return parcelMatrix[i][j];
+    }
 
     //Camera
     const {camera, gl, scene} = useThree()
@@ -93,6 +156,9 @@ export default function Experience() {
             const clickedLocLat = document.getElementById('clickedLocLat')
             const clickedLocLng = document.getElementById('clickedLocLng')
             const vect3D = sphereCoords(vectLatLng.x, vectLatLng.y, radius+0.2);
+
+            let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y);
+            console.log(closestParcel);
     
             clickedLocLat.textContent = `Latitude: ${vectLatLng.x}`;
             clickedLocLng.textContent = `Longitude: ${vectLatLng.y}`;
@@ -100,7 +166,7 @@ export default function Experience() {
             clickedLocUI.current.style.display = 'inline';
     
             clickedLocMesh.current.position.set(vect3D.x, vect3D.y, vect3D.z);
-            OrientObjectOnSphere(clickedLocMesh, vect3D.x, vect3D.y, vect3D.z)
+            OrientObjectOnSphere(clickedLocMesh, vect3D.x, vect3D.y, vect3D.z);
         }
     }
 
