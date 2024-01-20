@@ -66,19 +66,35 @@ export default function Experience() {
         fetchData();
     }, []);
 
-    // useEffect(() => {
-    //     if (parcelMatrix.length > 0) {
-    //         logMatrixByID(parcelMatrix.flat(), 316);
-    //     }
-    // }, [parcelMatrix]);
+    useEffect(() => {
+        if (parcelMatrix.length > 0) {
+            // parcelMatrix.forEach((row, i) => {
+            //     row.forEach((parcel, j) => {
+            //       if (parcel) {
+            //         const lat = sphereCoords(parcel.lat, parcel.lon, 22).x;
+            //         const lon = sphereCoords(parcel.lat, parcel.lon, 22).y;
+            //         const geometry = new THREE.PlaneGeometry(0.05, 0.05);
+            //         const material = new THREE.MeshBasicMaterial({color: 0xffff00});
+            //         const plane = new THREE.Mesh(geometry, material);
+            //         plane.position.set(lat, lon, 0);
+            //         // scene.add(plane);
+            //       }
+            //     });
+            //   });
+        }
+    }, [parcelMatrix]);
 
     function getClosestParcel(lat, lon) {
         // Calculate the index of the parcel that should be closest to the given coordinates
         let i = Math.floor(lat / latStep);
         let j = Math.floor(lon / lonStep);
+        let index = i * parcelsPerSide + j;
+
+        // Flatten the parcelMatrix into a 1D array
+        let flatParcelMatrix = parcelMatrix.flat();
     
         // Return the parcel at the calculated index
-        return parcelMatrix[i][j];
+        return flatParcelMatrix[index];
     }
 
     //Camera

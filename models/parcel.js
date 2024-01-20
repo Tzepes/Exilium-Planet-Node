@@ -1,12 +1,14 @@
 class Parcel {
     id = '';
-    owner = '';
+    userName = '';
+    ethereumAddress = '';
     latitude = 0;
     longitude = 0;
 
-    constructor(id, owner, latitude, longitude) {
+    constructor(id, userName, ethereumAddress, latitude, longitude) {
         this.id = id;
-        this.owner = owner;
+        this.userName = userName;
+        this.ethereumAddress = ethereumAddress;
         this.latitude = latitude;
         this.longitude = longitude;
     }

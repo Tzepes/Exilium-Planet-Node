@@ -3,7 +3,9 @@ const Schema = mongoose.Schema;
 
 const Parcel = new Schema({
     id: String,
-    owner: String,
+    userName: { type: String, default: null }, // Ethereum address of the owner
+    ethereumAddress: { type: String, default: null }, // Ethereum address of the owner
+    price: { type: Number, default: 0.05 },
     latitude: Number,
     longitude: Number
 });
