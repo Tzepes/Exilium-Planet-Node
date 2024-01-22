@@ -17,6 +17,7 @@ const latStep = latRange / parcelsPerSide;
 const lonStep = lonRange / parcelsPerSide;
 
 let parcelMatrix = [];
+let createdParcels = 0;
 
 for (let i = 0; i < parcelsPerSide; i++) {
     for (let j = 0; j < parcelsPerSide; j++) {
@@ -36,7 +37,10 @@ for (let i = 0; i < parcelsPerSide; i++) {
             longitude: lon
         });
         await newParcel.save();
-        // Assign the latitude and longitude to the parcel
+        
+        createdParcels++;
+        process.stdout.write(`Creating parcel ${createdParcels} of ${totalParcels}\r`);
+
         parcelMatrix.push(newParcel);
     }
 }

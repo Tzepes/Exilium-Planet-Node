@@ -1,12 +1,15 @@
 import './sidePanel.css'
-import { useState } from 'react'
+import axios from 'axios'
+import { useState, useEffect } from 'react'
 import { Text, Button } from '@radix-ui/themes';
 import * as Tabs from '@radix-ui/react-tabs';
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 import {handleConnect, wallet} from './utils/metamaskConnect'
 
-function SidePanel({closestParcel}) {
+function SidePanel({closestParcel}) { // use useEffect() for closestParcel click so app no longer rerenders
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [metamaskConnection, setMetamaskConnection] = useState(false);
+    const [ownsParcel, setOwnsParcel] = useState(false);
     const [parcel, setParcel] = useState({
         owner: 'Dummy name',
         metamaskAddress: wallet.accounts[0],
@@ -17,18 +20,60 @@ function SidePanel({closestParcel}) {
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
+        console.log(ownsParcel);
     }
 
-    function handleBuyParcel() {
+    async function connectToMetamask() {
+        try {
+            await handleConnect();
+            setMetamaskConnection(true); 
+        } catch (error) {
+            alert('Something went wrong. Please try again.');
+        }
+    }
+
+    
+    const fetchownsParcel = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3000/api/parcels/${wallet.accounts[0]}`);
+            if (response.status === 200 && Object.keys(response.data).length > 0) {
+                setParcel(response.data);
+                setOwnsParcel(true);
+            } else {
+                setOwnsParcel(false);
+            }
+        } catch (error) {
+            alert('Something went wrong. Please try again.');
+        }
+    };
+
+    useEffect(() => {
+        if (wallet.accounts[0]) {
+            fetchownsParcel();
+        }
+    }, [wallet.accounts]);
+
+    async function handleBuyParcel() {
         if (!wallet.accounts || wallet.accounts.length === 0) {
           alert('Please connect your wallet first.');
           return;
         }
         
-        closestParcel.userName = wallet.accounts[0];
-        closestParcel.ownerEthAddress = wallet.accounts[0];
-      
-        // TODO: Implement the logic to transfer the ether from the user's wallet to the contract
+        try {
+            const response = await axios.put(`http://localhost:3000/api/parcels/${closestParcel._id}`, {
+                ethereumAddress: wallet.accounts[0],
+            });
+            
+            if (response.status === 200) {
+                alert('Parcel bought successfully!');
+                setParcel(response.data);
+                fetchownsParcel();
+            } else {
+                alert('Something went wrong. Please try again.');
+            }
+        } catch (error) {
+            alert('Something went wrong. Please try again.');
+        }
       }
 
     return (
@@ -44,33 +89,46 @@ function SidePanel({closestParcel}) {
                     </Tabs.List>
                     <Tabs.Content value="tab1">
                     {wallet.accounts && wallet.accounts.length > 0 ? (
-                        <>
-                        <Text as="h2">My Parcel Information</Text>
-                        <Text as="p"><strong>Name:</strong> {parcel.owner}</Text>
-                        <Text as="p"><strong>Ethereum Address:</strong> {wallet.accounts[0]}</Text>
-                        <Text as="p"><strong>Location:</strong> {parcel.longitude}, {parcel.latitude}</Text>
-                        <Text as="p"><strong>Ether Value:</strong> {parcel.ethValue}</Text>
-                        </>
+                        ownsParcel ? (
+                            <>
+                              <Text as="h2">My Parcel Information</Text>
+                              <Text as="p"><strong>Name:</strong> {parcel.owner}</Text>
+                              <Text as="p"><strong>Ethereum Address:</strong> {wallet.accounts[0]}</Text>
+                              <Text as="p"><strong>Location:</strong> {parcel.longitude}, {parcel.latitude}</Text>
+                              <Text as="p"><strong>Ether Value:</strong> {parcel.ethValue}</Text>
+                            </>
+                          ) : (
+                            <>
+                              <Text as="p"><strong>Ethereum Address:</strong> {wallet.accounts[0]}</Text>
+                              <Text as="h3">You don't own a parcel, explore the planet and buy one now!</Text>
+                            </>
+                          )
                     ) : (
                         <>
                         <Text as="h3">Please connect your MetaMask account.</Text>
-                        <Button onClick={handleConnect}>Connect to MetaMask</Button>
+                        <Button onClick={connectToMetamask}>Connect to MetaMask</Button>
                         </>
                     )}
                     </Tabs.Content>
                     <Tabs.Content value="tab2">
+                        <Text as="h2">Parcel Information</Text>
                         {closestParcel ? (
                             <>
-                                <Text as="h2">Parcel Information</Text>
-                                <Text as="p"><strong>Owner:</strong> {closestParcel.userName}</Text>
-                                <Text as="p"><strong>Parcel ID:</strong> {closestParcel.id}</Text>
-                                <Text as="p"><strong>Ethereum Address:</strong> {closestParcel.ownerEthAddress}</Text>
-                                <Text as="p"><strong>Location:</strong> {closestParcel.longitude}, {closestParcel.latitude}</Text>
-                                <Text as="p"><strong>Ether Value:</strong> {closestParcel.price}</Text>
-                                {!closestParcel.ownerEthAddress && (
+                                {!ownsParcel ? (
                                     <>
+                                        <Text as="p"><strong>Parcel ID:</strong> {closestParcel.id}</Text>
+                                        <Text as="p"><strong>Location:</strong> {closestParcel.longitude}, {closestParcel.latitude}</Text>
+                                        <Text as="p"><strong>Ether Value:</strong> {closestParcel.price}</Text>
                                         <Text as="h2">This parcel has no owner</Text>
                                         <Button onClick={handleBuyParcel}>Buy for {closestParcel.price}</Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Text as="p"><strong>Owner:</strong> {closestParcel.userName}</Text>
+                                        <Text as="p"><strong>Parcel ID:</strong> {closestParcel.id}</Text>
+                                        <Text as="p"><strong>Ethereum Address:</strong> {closestParcel.ownerEthAddress}</Text>
+                                        <Text as="p"><strong>Location:</strong> {closestParcel.longitude}, {closestParcel.latitude}</Text>
+                                        <Text as="p"><strong>Ether Value:</strong> {closestParcel.price}</Text>
                                     </>
                                 )}
                             </>

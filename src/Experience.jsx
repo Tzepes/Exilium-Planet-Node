@@ -45,7 +45,7 @@ export default function Experience({ setClosestParcel }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const getParcels = await axios.get('http://localhost:3000/getParcels');
+                const getParcels = await axios.get('http://localhost:3000/api/parcels');
                 
                 // Create a new matrix filled with null values
                 const newMatrix = new Array(316).fill(null).map(() => new Array(316).fill(null));
