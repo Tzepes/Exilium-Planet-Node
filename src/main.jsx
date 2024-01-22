@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import ReactDOM from 'react-dom/client'
 import { Canvas } from '@react-three/fiber'
 import Experience from './Experience.jsx'
@@ -12,14 +12,20 @@ const created = ({gl}) => {
     gl.setClearColor('#000000', 1)
 }
 
-root.render(
-  <>  
-    <Theme appearance="dark" accentColor="mint" grayColor="sage" radius="small" panelBackground='translucent '>
-        <SidePanel/>
-    </Theme>
-    <Canvas
-        onCreated={ created }>
-        <Experience/>
-    </Canvas>
-  </>
-) 
+const Main = () => {
+    const [closestParcel, setClosestParcel] = useState(null);
+
+    return (
+        <>  
+            <Theme appearance="dark" accentColor="mint" grayColor="sage" radius="small" panelBackground='translucent '>
+                <SidePanel closestParcel={closestParcel}/>
+            </Theme>
+            <Canvas
+                onCreated={ created }>
+                <Experience setClosestParcel={setClosestParcel}/>
+            </Canvas>
+        </>
+    );
+}
+
+root.render(<Main />) 

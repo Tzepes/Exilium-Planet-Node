@@ -28,7 +28,7 @@ for (let i = 0; i < parcelsPerSide; i++) {
         let lon = azimuth * 180 / Math.PI - 180; // Convert from radians to degrees and shift range from 0-360 to -180-180
         
         let newParcel = new ParcelModel({
-            id: `${i}-${j}`,
+            id: `${i}-${j}`, // matrix location
             userName: null,
             ethereumAddress: null,
             price: 0.05,

@@ -17,7 +17,7 @@ extend({ OrbitControls: OrbitControls})
  * if mouse hovers above html UI, zooming doesnt work
  */
 
-export default function Experience() {
+export default function Experience({ setClosestParcel }) {
     //Get Parcels data
     const [parcelMatrix, setParcelMatrix] = useState([]);
 
@@ -92,7 +92,7 @@ export default function Experience() {
 
         // Flatten the parcelMatrix into a 1D array
         let flatParcelMatrix = parcelMatrix.flat();
-    
+        setClosestParcel(flatParcelMatrix[index]);
         // Return the parcel at the calculated index
         return flatParcelMatrix[index];
     }

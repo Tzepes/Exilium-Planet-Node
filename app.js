@@ -31,4 +31,8 @@ app.get("/getParcels", async (req, res) => {
   }
 });
 
+app.put("/api/parcels/:id", async (req, res) => {
+  
+});
+
 ViteExpress.listen(app, 3000, () => console.log("Server is listening..."));
