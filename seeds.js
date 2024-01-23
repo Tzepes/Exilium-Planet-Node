@@ -34,7 +34,7 @@ for (let i = 0; i < parcelsPerSide; i++) {
 
         let newParcel = new ParcelModel({
             id: `${i}-${j}`, // matrix location
-            userName: null,
+            ownerUsername: null,
             ethereumAddress: null,
             ethValue: 0.05,
             latitude: lat,

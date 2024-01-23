@@ -121,6 +121,7 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
         
         try {
             const response = await axios.put(`http://localhost:3000/api/parcels/${closestParcel._id}`, {
+                username: user.username,
                 ethereumAddress: wallet.accounts[0],
             });
             
