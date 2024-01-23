@@ -10,7 +10,10 @@ import {handleConnect, wallet} from './utils/metamaskConnect'
 function SidePanel({closestParcel}) { // use useEffect() for closestParcel click so app no longer rerenders
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [metamaskConnection, setMetamaskConnection] = useState(false);
-    const [username, setUsername] = useState('');
+    const [user, setUser] = useState({
+        username: '',
+        metamaskAddress: '',
+    });
     const [ownsParcel, setOwnsParcel] = useState(false);
     const [parcel, setParcel] = useState({
         username: 'Name',
@@ -55,12 +58,15 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
 
         try {
             const response = await axios.put('http://localhost:3000/api/users/createUser', {
-                username,
+                username: user.username,
                 cntEthAddress: wallet.accounts[0],
             });
 
             if (response.status === 200 && Object.keys(response.data).length > 0) {
-                setUsername(response.data.username);
+                setUser({ 
+                    username: response.data.username || '', 
+                    metamaskAddress: response.data.cntEthAddress || '' 
+                  });
                 setParcel(prevParcel => ({ ...prevParcel, username: response.data.username }));
                 fetchownsParcel();
             } else {
@@ -75,7 +81,10 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
         try {
             const response = await axios.get(`http://localhost:3000/api/users/${wallet.accounts[0]}`);
             if(response.status === 200 && Object.keys(response.data).length > 0) {
-                setUsername(response.data.username);
+                setUser({ 
+                    username: response.data.username || '', 
+                    metamaskAddress: response.data.ethAddress || '' 
+                  });
                 setParcel(prevParcel => ({ ...prevParcel, username: response.data.username }));
             }
         } catch (error) {
@@ -99,6 +108,7 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
 
     useEffect(() => {
         if (wallet.accounts[0]) {
+            fetchUser();
             fetchownsParcel();
         }
     }, [wallet.accounts]);
@@ -140,17 +150,17 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
                     </Tabs.List>
                     <Tabs.Content value="tab1">
                         {wallet.accounts && wallet.accounts.length > 0 ? (
-                            parcel.owner && parcel.metamaskAddress ? (
+                            user.username && user.metamaskAddress ? (
                                 <>
-                                    <Text as="p"><strong>Name:</strong> {parcel.owner}</Text>
-                                    <Text as="p"><strong>Ethereum Address:</strong> {wallet.accounts[0]}</Text>
+                                    <Text as="p"><strong>Name:</strong> {user.username}</Text>
+                                    <Text as="p"><strong>Ethereum Address:</strong> {user.metamaskAddress}</Text>
                                 </>
                             ) : (
                                 <>
                                     <form onSubmit={handleUsernameSubmit}>
                                         <label>
                                             Username:
-                                            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                                            <input type="text" value={user.username} onChange={(e) => setUser({...user, username: e.target.value})} required />
                                         </label>
                                         <Button type="submit">Connect</Button>
                                     </form>
@@ -159,6 +169,7 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
                         ):(
                             <>
                                 <Text as="h3">Please connect your MetaMask account.</Text>
+                                <Button size="2" variant="surface" onClick={connectToMetamask}>Connect to MetaMask</Button>
                             </>
                         )}
                         
