@@ -4,6 +4,7 @@ import { Canvas } from '@react-three/fiber'
 import Experience from './Experience.jsx'
 import SidePanel from './SidePanel.jsx'
 import './index.css'
+// import '@radix-ui/themes/styles.css';
 import { Theme } from '@radix-ui/themes'
 
 const root = ReactDOM.createRoot(document.querySelector('#root'))

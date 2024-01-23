@@ -28,13 +28,32 @@ for (let i = 0; i < parcelsPerSide; i++) {
         let lat = 90 - (inclination * 180 / Math.PI); // Convert from radians to degrees and shift range from 0-180 to 90--90
         let lon = azimuth * 180 / Math.PI - 180; // Convert from radians to degrees and shift range from 0-360 to -180-180
         
+        let maxH2O = Math.floor(Math.random() * 20);
+        let ice = Math.floor(Math.random() * maxH2O);
+        let liquidWater = Math.floor(Math.random() * (maxH2O/3));
+
         let newParcel = new ParcelModel({
             id: `${i}-${j}`, // matrix location
             userName: null,
             ethereumAddress: null,
-            price: 0.05,
+            ethValue: 0.05,
             latitude: lat,
-            longitude: lon
+            longitude: lon,
+            resources: {
+                minerals: { 
+                    iron: Math.floor(Math.random() * 60) + 1,
+                    aluminum: Math.floor(Math.random() * 70) + 1,
+                    titanium: Math.floor(Math.random() * 20) + 1,
+                    copper: Math.floor(Math.random() * 60) + 1,
+                    silver: Math.floor(Math.random() * 30) + 1,
+                    gold: Math.floor(Math.random() * 10) + 1,
+                },
+                naturalResources: {
+                    liquidWater: Math.floor(Math.random() * (maxH2O/3)),
+                    ice: Math.floor(Math.random() * maxH2O),
+                },
+                naturalGas: Math.floor(Math.random() * 40) + 1,
+            },
         });
         await newParcel.save();
         

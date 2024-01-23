@@ -20,7 +20,6 @@ export const formatBalance = (rawBalance: string) => {
 
 const updateWallet = async (accounts:any) => { 
   try {
-    console.log("it works");
     if (typeof accounts[0] !== 'string') {
       throw new Error('Account address must be a string');
     }

@@ -1,26 +1,44 @@
 import './sidePanel.css'
 import axios from 'axios'
 import { useState, useEffect } from 'react'
-import { Text, Button } from '@radix-ui/themes';
-import * as Tabs from '@radix-ui/react-tabs';
+import { Text, Button, Table } from '@radix-ui/themes';
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
+import * as Tabs from '@radix-ui/react-tabs';
+import * as Form from '@radix-ui/react-form';
 import {handleConnect, wallet} from './utils/metamaskConnect'
 
 function SidePanel({closestParcel}) { // use useEffect() for closestParcel click so app no longer rerenders
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [metamaskConnection, setMetamaskConnection] = useState(false);
+    const [username, setUsername] = useState('');
     const [ownsParcel, setOwnsParcel] = useState(false);
     const [parcel, setParcel] = useState({
-        owner: 'Dummy name',
+        username: 'Name',
         metamaskAddress: wallet.accounts[0],
-        longitude: '40.712776',
-        latitude: '-74.005974', 
+        longitude: '0',
+        latitude: '0', 
+        resources:{
+            minerals: {
+                iron: 0,
+                aluminum: 0,
+                titanium: 0,
+                copper: 0,
+                silver: 0,
+                gold: 0,
+            },
+            naturalResources: {
+                liquidWater: 0,
+                ice: 0,
+            },
+            naturalGas: 0,
+        },
+        population: 0,
+        terraformProgress: 0,
         ethValue: '0.05',
       });
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
-        console.log(ownsParcel);
     }
 
     async function connectToMetamask() {
@@ -32,12 +50,44 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
         }
     }
 
+    const handleUsernameSubmit = async (event) => {
+        event.preventDefault()
+
+        try {
+            const response = await axios.put('http://localhost:3000/api/users/createUser', {
+                username,
+                cntEthAddress: wallet.accounts[0],
+            });
+
+            if (response.status === 200 && Object.keys(response.data).length > 0) {
+                setUsername(response.data.username);
+                setParcel(prevParcel => ({ ...prevParcel, username: response.data.username }));
+                fetchownsParcel();
+            } else {
+                alert('Something went wrong. Please try again.');
+            }
+        } catch (error) {
+            alert('Something went wrong. Please try again.');
+        }
+    };
+
+    const fetchUser = async() => {
+        try {
+            const response = await axios.get(`http://localhost:3000/api/users/${wallet.accounts[0]}`);
+            if(response.status === 200 && Object.keys(response.data).length > 0) {
+                setUsername(response.data.username);
+                setParcel(prevParcel => ({ ...prevParcel, username: response.data.username }));
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
     
     const fetchownsParcel = async () => {
         try {
             const response = await axios.get(`http://localhost:3000/api/parcels/${wallet.accounts[0]}`);
             if (response.status === 200 && Object.keys(response.data).length > 0) {
-                setParcel(response.data);
+                setParcel(response.data[0]);
                 setOwnsParcel(true);
             } else {
                 setOwnsParcel(false);
@@ -84,17 +134,81 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
             <div className={`menu ${isMenuOpen ? '' : 'menu-close'}`}>
                 <Tabs.Root activationMode='true' defaultValue="tab1" className="TabsRoot">
                     <Tabs.List className='TabsList'>
-                        <Tabs.Trigger value="tab1" className='TabsTrigger'><h4>My Account</h4></Tabs.Trigger>
-                        <Tabs.Trigger value="tab2" className='TabsTrigger'><h4>Clicked Parcel</h4></Tabs.Trigger>
+                        <Tabs.Trigger value="tab1" className='TabsTrigger'><h4>Account</h4></Tabs.Trigger>
+                        <Tabs.Trigger value="tab2" className='TabsTrigger'><h4>Parcel</h4></Tabs.Trigger>
+                        <Tabs.Trigger value="tab3" className='TabsTrigger'><h4>Clicked Parcel</h4></Tabs.Trigger>
                     </Tabs.List>
                     <Tabs.Content value="tab1">
+                        {wallet.accounts && wallet.accounts.length > 0 ? (
+                            parcel.owner && parcel.metamaskAddress ? (
+                                <>
+                                    <Text as="p"><strong>Name:</strong> {parcel.owner}</Text>
+                                    <Text as="p"><strong>Ethereum Address:</strong> {wallet.accounts[0]}</Text>
+                                </>
+                            ) : (
+                                <>
+                                    <form onSubmit={handleUsernameSubmit}>
+                                        <label>
+                                            Username:
+                                            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                                        </label>
+                                        <Button type="submit">Connect</Button>
+                                    </form>
+                                </>
+                            )
+                        ):(
+                            <>
+                                <Text as="h3">Please connect your MetaMask account.</Text>
+                            </>
+                        )}
+                        
+                    </Tabs.Content>
+                    <Tabs.Content value="tab2">
                     {wallet.accounts && wallet.accounts.length > 0 ? (
                         ownsParcel ? (
                             <>
-                              <Text as="h2">My Parcel Information</Text>
-                              <Text as="p"><strong>Name:</strong> {parcel.owner}</Text>
-                              <Text as="p"><strong>Ethereum Address:</strong> {wallet.accounts[0]}</Text>
+                              <Text as="h2">My Parcel Information</Text>                              
                               <Text as="p"><strong>Location:</strong> {parcel.longitude}, {parcel.latitude}</Text>
+                              <Text as="h3">Resources</Text>
+                              <Table.Root>
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.ColumnHeaderCell>Iron</Table.ColumnHeaderCell>
+                                        <Table.ColumnHeaderCell>Aluminum</Table.ColumnHeaderCell>
+                                        <Table.ColumnHeaderCell>Titanium</Table.ColumnHeaderCell>
+                                        <Table.ColumnHeaderCell>Copper</Table.ColumnHeaderCell>
+                                        <Table.ColumnHeaderCell>Silver</Table.ColumnHeaderCell>
+                                        <Table.ColumnHeaderCell>Gold</Table.ColumnHeaderCell>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    <Table.Row>
+                                    <Table.RowHeaderCell>{parcel.resources.minerals.iron}</Table.RowHeaderCell>
+                                    <Table.Cell>{parcel.resources.minerals.aluminum}</Table.Cell>
+                                    <Table.Cell>{parcel.resources.minerals.titanium}</Table.Cell>
+                                    <Table.Cell>{parcel.resources.minerals.copper}</Table.Cell>
+                                    <Table.Cell>{parcel.resources.minerals.silver}</Table.Cell>
+                                    <Table.Cell>{parcel.resources.minerals.gold}</Table.Cell>
+                                    </Table.Row>
+                                </Table.Body>
+                              </Table.Root>
+
+                              <Table.Root>
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.ColumnHeaderCell>Liquid Water</Table.ColumnHeaderCell>
+                                        <Table.ColumnHeaderCell>Ice</Table.ColumnHeaderCell>
+                                        <Table.ColumnHeaderCell>Natural Gas</Table.ColumnHeaderCell>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    <Table.Row>
+                                        <Table.RowHeaderCell>{parcel.resources.naturalResources.liquidWater}</Table.RowHeaderCell>
+                                        <Table.Cell>{parcel.resources.naturalResources.ice}</Table.Cell>
+                                        <Table.Cell>{parcel.resources.naturalGas}</Table.Cell>
+                                    </Table.Row>
+                                </Table.Body>
+                              </Table.Root>
                               <Text as="p"><strong>Ether Value:</strong> {parcel.ethValue}</Text>
                             </>
                           ) : (
@@ -106,11 +220,11 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
                     ) : (
                         <>
                         <Text as="h3">Please connect your MetaMask account.</Text>
-                        <Button onClick={connectToMetamask}>Connect to MetaMask</Button>
+                        <Button size="2" variant="surface" onClick={connectToMetamask}>Connect to MetaMask</Button>
                         </>
                     )}
                     </Tabs.Content>
-                    <Tabs.Content value="tab2">
+                    <Tabs.Content value="tab3">
                         <Text as="h2">Parcel Information</Text>
                         {closestParcel ? (
                             <>
@@ -118,9 +232,9 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
                                     <>
                                         <Text as="p"><strong>Parcel ID:</strong> {closestParcel.id}</Text>
                                         <Text as="p"><strong>Location:</strong> {closestParcel.longitude}, {closestParcel.latitude}</Text>
-                                        <Text as="p"><strong>Ether Value:</strong> {closestParcel.price}</Text>
+                                        <Text as="p"><strong>Ether Value:</strong> {closestParcel.ethValue}</Text>
                                         <Text as="h2">This parcel has no owner</Text>
-                                        <Button onClick={handleBuyParcel}>Buy for {closestParcel.price}</Button>
+                                        <Button onClick={handleBuyParcel}>Buy for {closestParcel.ethValue}</Button>
                                     </>
                                 ) : (
                                     <>
@@ -128,7 +242,7 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
                                         <Text as="p"><strong>Parcel ID:</strong> {closestParcel.id}</Text>
                                         <Text as="p"><strong>Ethereum Address:</strong> {closestParcel.ownerEthAddress}</Text>
                                         <Text as="p"><strong>Location:</strong> {closestParcel.longitude}, {closestParcel.latitude}</Text>
-                                        <Text as="p"><strong>Ether Value:</strong> {closestParcel.price}</Text>
+                                        <Text as="p"><strong>Ether Value:</strong> {closestParcel.ethValue}</Text>
                                     </>
                                 )}
                             </>
