@@ -150,8 +150,8 @@ function SidePanel({closestParcel}) { // use useEffect() for closestParcel click
                         <Tabs.Trigger value="tab3" className='TabsTrigger'><h4>Clicked Parcel</h4></Tabs.Trigger>
                     </Tabs.List>
                     <Tabs.Content value="tab1">
-                        {wallet.accounts && wallet.accounts.length > 0 ? (
-                            user.username && user.metamaskAddress ? (
+                        {wallet.accounts && wallet.accounts.length > 0 ? ( // if user is logged in
+                            user.username && user.metamaskAddress ? ( // if user has username and metamask address
                                 <>
                                     <Text as="p"><strong>Name:</strong> {user.username}</Text>
                                     <Text as="p"><strong>Ethereum Address:</strong> {user.metamaskAddress}</Text>
