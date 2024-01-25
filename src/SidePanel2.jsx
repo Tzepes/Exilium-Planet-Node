@@ -12,6 +12,7 @@ import ResourcesTable from './ResourcesTable';
 import FormConnect from './FormConnect';
 
 import {handleConnect, wallet} from './utils/metamaskConnect'
+import { connectToMetamask, handleUsernameSubmit, fetchUser, fetchownsParcel, handleBuyParcel } from './utils/apis';
 
 function SidePanel2({closestParcel}) {
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -46,100 +47,16 @@ function SidePanel2({closestParcel}) {
         ethValue: '0.05',
   });
 
-  async function connectToMetamask() {
-    try {
-        await handleConnect();
-        setMetamaskConnection(true); 
-    } catch (error) {
-        alert('Something went wrong. Please try again.');
-    }
-}
+connectToMetamask(handleConnect, setMetamaskConnection);
 
-const handleUsernameSubmit = async (event) => {
-    event.preventDefault()
-
-    try {
-        const response = await axios.put('http://localhost:3000/api/users/createUser', {
-            username: user.username,
-            cntEthAddress: wallet.accounts[0],
-        });
-
-        if (response.status === 200 && Object.keys(response.data).length > 0) {
-            setUser({ 
-                username: response.data.username || '', 
-                ethAddress: response.data.cntEthAddress || '' 
-              });
-            setParcel(prevParcel => ({ ...prevParcel, username: response.data.username }));
-            fetchownsParcel();
-        } else {
-            alert('Something went wrong. Please try again.');
-        }
-    } catch (error) {
-        alert('Something went wrong. Please try again.');
-    }
-};
-
-const fetchUser = async() => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/users/${wallet.accounts[0]}`);
-        if(response.status === 200 && Object.keys(response.data).length > 0) {
-            setUser({ 
-                username: response.data.username || '', 
-                ethAddress: response.data.ethAddress || '' 
-              });
-              console.log(response.data.username);
-            setParcel(prevParcel => ({ ...prevParcel, username: response.data.username }));
-            setMetamaskConnection(true);
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-const fetchownsParcel = async () => {
-    try {
-        const response = await axios.get(`http://localhost:3000/api/parcels/${wallet.accounts[0]}`);
-        if (response.status === 200 && Object.keys(response.data).length > 0) {
-            setParcel(response.data[0]);
-            setOwnsParcel(true);
-        } else {
-            setOwnsParcel(false);
-        }
-    } catch (error) {
-        alert('Something went wrong. Please try again.');
-    }
-};
+// handleUsernameSubmit(user, wallet, setUser, setParcel); //add this to the form submit
 
 useEffect(() => {
-    if (wallet.accounts[0]) {
-        fetchUser();
-        fetchownsParcel();
-    }
-}, [wallet.accounts]);
-
-async function handleBuyParcel() {
-    if (!wallet.accounts || wallet.accounts.length === 0) {
-      alert('Please connect your wallet first.');
-      return;
-    }
-    
-    try {
-        const response = await axios.put(`http://localhost:3000/api/parcels/${closestParcel._id}`, {
-            username: user.username,
-            ethereumAddress: wallet.accounts[0],
-        });
-        
-        if (response.status === 200) {
-            alert('Parcel bought successfully!');
-            setParcel(response.data);
-            fetchownsParcel();
-        } else {
-            alert('Something went wrong. Please try again.');
-        }
-    } catch (error) {
-        alert('Something went wrong. Please try again.');
-    }
+  if (wallet && wallet.accounts[0]) {
+      fetchUser(wallet, setUser, setParcel, setMetamaskConnection);
+      fetchownsParcel(wallet, setParcel, setOwnsParcel);
   }
+}, [wallet.accounts]);
 
   return (
     <>
@@ -171,7 +88,7 @@ async function handleBuyParcel() {
                     <Text>{user.ethAddress}</Text>
                   </>
                 ) : (
-                  <FormConnect /> // insert userame form
+                  <FormConnect wallet={wallet} setUser={setUser} setParcel={setParcel} setOwnsParcel={setOwnsParcel}/> // insert userame form
                 )
                 ) : (
                   <>
@@ -228,7 +145,7 @@ async function handleBuyParcel() {
                       <Text as="p"><strong>Location:</strong> {closestParcel.longitude}, {closestParcel.latitude}</Text>
                       <Text as="p"><strong>Ether Value:</strong> {closestParcel.ethValue}</Text>
                       <Text as="h2">This parcel has no owner</Text>
-                      <Button onClick={handleBuyParcel}>Buy for {closestParcel.ethValue}</Button>
+                      <Button onClick={() => handleBuyParcel(wallet, user, closestParcel, setOwnsParcel)}>Buy for {closestParcel.ethValue}</Button>
                   </>
                   )}
                   

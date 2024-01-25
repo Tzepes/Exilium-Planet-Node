@@ -5,7 +5,7 @@ import { Text } from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
 import './SurfaceIcon.css'
 
-function SurfaceIcon({lat, lng, IconComponent, parcelType}) {
+function SurfaceIcon({lat, lng, IconComponent, parcelType, children}) {
 
   return (
     <>

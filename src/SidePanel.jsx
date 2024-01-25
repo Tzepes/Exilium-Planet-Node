@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Text, Button, Table } from '@radix-ui/themes';
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
-import * as Form from '@radix-ui/react-form';
 import {handleConnect, wallet} from './utils/metamaskConnect'
 
 function SidePanel({closestParcel}) { // use useEffect() for closestParcel click so app no longer rerenders

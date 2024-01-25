@@ -13,6 +13,7 @@ import loadingFragment from './shaders/loadingFragment.glsl'
 import {HomeIcon, SewingPinFilledIcon} from '@radix-ui/react-icons'
 
 import axios from 'axios'
+import {wallet} from './utils/metamaskConnect'
 
 import SurfaceIcon from './SurfaceIcon.jsx'
 
@@ -165,8 +166,8 @@ export default function Experience({ setClosestParcel }) {
 
             let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y);
             console.log(closestParcel);
-            
-            setClickedLoc({lat: vectLatLng.x, lng: vectLatLng.y})
+
+            setClickedLoc({ lat: vectLatLng.x, lng: vectLatLng.y });
     
             clickedLocUI.current.style.display = 'inline';
     
