@@ -60,7 +60,7 @@ input {
 
 .Text {
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   color: var(--mauve-12);
   font-size: 15px;
   line-height: 1.5;

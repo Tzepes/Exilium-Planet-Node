@@ -1,14 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { extend, useLoader, useThree, useFrame } from '@react-three/fiber'
+import { extend, useThree, useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { gsap } from 'gsap/gsap-core'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+
 import planetGlowVertex from './shaders/planetGlowVertex.glsl'
 import planetGlowFragment from './shaders/planetGlowFragment.glsl'
 import loadingVertex from './shaders/loadingVertex.glsl'
 import loadingFragment from './shaders/loadingFragment.glsl'
+
+import {HomeIcon, SewingPinFilledIcon} from '@radix-ui/react-icons'
+
 import axios from 'axios'
+
+import SurfaceIcon from './SurfaceIcon.jsx'
 
 extend({ OrbitControls: OrbitControls})
 
@@ -146,20 +152,21 @@ export default function Experience({ setClosestParcel }) {
     //Events
     const clickedLocMesh = useRef()
     const clickedLocUI = useRef()
+    const [clickedLoc, setClickedLoc] = useState({
+        lat: 0,
+        lng: 0
+    });
     
     const planetClick = (event) => 
     {
         if(loaded){
             const vectLatLng = getLatLng(event.point.x, event.point.y, event.point.z)
-            const clickedLocLat = document.getElementById('clickedLocLat')
-            const clickedLocLng = document.getElementById('clickedLocLng')
             const vect3D = sphereCoords(vectLatLng.x, vectLatLng.y, radius+0.2);
 
             let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y);
             console.log(closestParcel);
-    
-            clickedLocLat.textContent = `Latitude: ${vectLatLng.x}`;
-            clickedLocLng.textContent = `Longitude: ${vectLatLng.y}`;
+            
+            setClickedLoc({lat: vectLatLng.x, lng: vectLatLng.y})
     
             clickedLocUI.current.style.display = 'inline';
     
@@ -295,24 +302,20 @@ export default function Experience({ setClosestParcel }) {
         </mesh>
 
         {/* Base Location */}
-        <mesh position={[playerBaseLocation.x, playerBaseLocation.y, playerBaseLocation.z]}>
-            <sphereGeometry args={[0.5, 20, 20]}/>
-            <meshStandardMaterial color={'cyan'}/>
+        <mesh position={[playerBaseLocation.x, playerBaseLocation.y, playerBaseLocation.z]} visible={false}>
+            <sphereGeometry args={[0.5, 4, 4]}/>
+            <meshBasicMaterial/>
             <Html ref={baseLocUI} wrapperClass="locationUI">
-                        My Base
-                <p>Latitude: {baseLat}</p>
-                <p>Longitude: {baseLng}</p>
+                <SurfaceIcon lat={baseLat} lng={baseLng} IconComponent={HomeIcon} parcelType={"Owned Parcel"}/>                       
             </Html>
         </mesh>
 
         {/* Clicked location */}
-        <mesh ref={clickedLocMesh}>
+        <mesh ref={clickedLocMesh} visible={false}>
             <planeGeometry args={[1, 1, 2, 2]}/>
             <meshStandardMaterial/>
             <Html ref={clickedLocUI} wrapperClass="locationUI" occlude={false} style={{display: 'none'}}>
-                Clicked Location
-                <p id='clickedLocLat'>Latitude: </p>
-                <p id='clickedLocLng'>Longitude: </p>
+                <SurfaceIcon lat={clickedLoc.lat} lng={clickedLoc.lng} IconComponent={SewingPinFilledIcon} parcelType={"Clicked Parcel"}/>
             </Html>
         </mesh>
 

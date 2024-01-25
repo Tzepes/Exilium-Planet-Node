@@ -5,20 +5,19 @@ import { Text } from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
 import './SurfaceIcon.css'
 
-function SurfaceIcon({location}) {
-  const [count, setCount] = useState(0)
+function SurfaceIcon({lat, lng, IconComponent, parcelType}) {
 
   return (
     <>
       <HoverCard.Root>
         <HoverCard.Trigger asChild>
-          <HomeIcon className='HoverCardIcon'/>
+          <IconComponent className='HoverCardIcon'/>
         </HoverCard.Trigger>
         <HoverCard.Portal>
           <HoverCard.Content className="HoverCardContent" sideOffset={5}>
-            <div className="Text bold"><strong>Owned Parcel</strong></div>
-            <Text as="p" mb="5" size="3">Latitude: </Text> 
-            <Text as="p" mb="5" size="3">Longitude: </Text>
+            <div className="Text bold"><strong>{parcelType}</strong></div>
+            <Text as="p" mb="5" size="3">Latitude: {lat}</Text> 
+            <Text as="p" mb="5" size="3">Longitude: {lng}</Text>
           <HoverCard.Arrow />
           </HoverCard.Content>
         </HoverCard.Portal>

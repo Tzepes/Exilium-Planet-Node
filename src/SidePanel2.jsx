@@ -165,9 +165,10 @@ async function handleBuyParcel() {
                 user.username && user.ethAddress ? (
                   <>
                     <h3 className="Text">User Name</h3>
-                    <p>{user.username}</p>
+                    <Text>{user.username}</Text>
+                    <p></p>
                     <h3 className='Text'>Ethereum Adress</h3>
-                    <p>{user.ethAddress}</p>
+                    <Text>{user.ethAddress}</Text>
                   </>
                 ) : (
                   <FormConnect /> // insert userame form

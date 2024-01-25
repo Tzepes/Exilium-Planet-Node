@@ -2,7 +2,6 @@ import React, {useState} from 'react'
 import ReactDOM from 'react-dom/client'
 import { Canvas } from '@react-three/fiber'
 import Experience from './Experience.jsx'
-import SidePanel from './SidePanel.jsx'
 import SidePanel2 from './SidePanel2.jsx'
 import './index.css'
 import '@radix-ui/themes/styles.css';
