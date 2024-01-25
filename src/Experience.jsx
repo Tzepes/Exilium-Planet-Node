@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
 import * as THREE from 'three'
 import { extend, useThree, useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
@@ -13,7 +13,7 @@ import loadingFragment from './shaders/loadingFragment.glsl'
 import {HomeIcon, SewingPinFilledIcon} from '@radix-ui/react-icons'
 
 import axios from 'axios'
-import {wallet} from './utils/metamaskConnect'
+import { sphereCoords, getLatLng } from './utils/sphericalCoords.js'
 
 import SurfaceIcon from './SurfaceIcon.jsx'
 
@@ -24,8 +24,7 @@ extend({ OrbitControls: OrbitControls})
  * if mouse hovers above html UI, zooming doesnt work
  */
 
-export default function Experience({ setClosestParcel }) {
-    //Get Parcels data
+export default function Experience({  }) {
     const [parcelMatrix, setParcelMatrix] = useState([]);
 
     const totalParcels = 99856;
@@ -37,19 +36,7 @@ export default function Experience({ setClosestParcel }) {
     const latStep = latRange / parcelsPerSide;
     const lonStep = lonRange / parcelsPerSide;
 
-    function logMatrixByID(flatArray, elementsPerRow) {
-        let matrix = [];
-        for (let i = 0; i < flatArray.length; i += elementsPerRow) {
-          let row = [];
-          for (let j = i; j < i + elementsPerRow; j++) {
-            row.push(`[${flatArray[j].id}]`);
-          }
-          matrix.push(row);
-        }
-        console.log(matrix.map(row => row.join(' ')).join('\n'));
-    }
-
-    useEffect(() => {
+    useEffect(() => { // ramane aici
         const fetchData = async () => {
             try {
                 const getParcels = await axios.get('http://localhost:3000/api/parcels');
@@ -73,7 +60,7 @@ export default function Experience({ setClosestParcel }) {
         fetchData();
     }, []);
 
-    function getClosestParcel(lat, lon) {
+    function getClosestParcel(lat, lon) { // separa asta in alt fisier
         // Calculate the index of the parcel that should be closest to the given coordinates
         let i = Math.floor(lat / latStep);
         let j = Math.floor(lon / lonStep);
@@ -81,7 +68,8 @@ export default function Experience({ setClosestParcel }) {
 
         // Flatten the parcelMatrix into a 1D array
         let flatParcelMatrix = parcelMatrix.flat();
-        setClosestParcel(flatParcelMatrix[index]);
+        // setClosestParcel(flatParcelMatrix[index]);
+        // console.log(closestParcel);
         // Return the parcel at the calculated index
         return flatParcelMatrix[index];
     }
@@ -167,7 +155,7 @@ export default function Experience({ setClosestParcel }) {
             let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y);
             console.log(closestParcel);
 
-            setClickedLoc({ lat: vectLatLng.x, lng: vectLatLng.y });
+            //setClickedLoc({ lat: vectLatLng.x, lng: vectLatLng.y });
     
             clickedLocUI.current.style.display = 'inline';
     
@@ -190,48 +178,6 @@ export default function Experience({ setClosestParcel }) {
 
     function cameraDistToOrg() {
         return Math.sqrt(camera.position.x * camera.position.x + camera.position.y * camera.position.y + camera.position.z * camera.position.z)
-    }
-
-    /**
-     * Sferical coordonates
-     */
-
-    function sphereCoords(lat, lng, r) {
-        let theta = lat * Math.PI/180;
-        let phi = lng * Math.PI/180;
-
-        let x = (r * Math.sin(theta) * Math.cos(phi));
-        let y = (r * Math.sin(theta) * Math.sin(phi));
-        let z = (r * Math.cos(theta));
-
-        return new THREE.Vector3(x, y, z);
-    }
-
-    // Use UV coords to have updating lat and lng based on planet rotation
-    function getLatLng(x, y, z){
-        let theta = Math.acos(z/Math.sqrt(x*x + y*y + z*z));
-        let phi = CalculatePhi(x, y);
-        
-        let lat = 180/Math.PI * theta;
-        let lng = 180/Math.PI * phi;
-        
-        return new THREE.Vector2(lat, lng)
-    }
-
-    function CalculatePhi(x, y){
-        let phi = 0;
-        if(x>0){
-            phi = Math.atan(y/x);
-        } else if(x < 0 && y >= 0){
-            phi = Math.atan(y/x) + Math.PI;
-        } else if(x < 0 && y < 0){
-            phi = Math.atan(y/x) - Math.PI;
-        } else if(x == 0 && y > 0){
-            phi = Math.PI/2
-        } else if(x == 0 && y < 0){
-            phi = -Math.PI/2
-        }
-        return phi;
     }
 
     function OrientObjectOnSphere(object, objX, objY, objZ){
