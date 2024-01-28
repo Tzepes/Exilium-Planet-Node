@@ -26,7 +26,7 @@ extend({ OrbitControls: OrbitControls})
  * if mouse hovers above html UI, zooming doesnt work
  */
 
-export default function Experience({  }) {
+export default function Experience({ setClosestParcel }) {
     const [parcelMatrix, setParcelMatrix] = useState([]);
     const [onwedParcel, setOwnedParcel] = useState({lat: 0, lng: 0});
 
@@ -56,13 +56,11 @@ export default function Experience({  }) {
 
                 setParcelMatrix(newMatrix);
                 setOwnedParcel(getOwnedParcel.data[0]);
-                console.log(onwedParcel);
                 
             } catch (error) {
                 console.error(error);
             }
         }
-        console.log(onwedParcel);
 
         fetchData();
     }, []);
@@ -169,9 +167,9 @@ export default function Experience({  }) {
             const vect3D = sphereCoords(vectLatLng.x, vectLatLng.y, radius+0.2);
 
             let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y);
-            console.log(closestParcel);
+            setClosestParcel(closestParcel)
 
-            //setClickedLoc({ lat: vectLatLng.x, lng: vectLatLng.y });
+            setClickedLoc({ lat: vectLatLng.x, lng: vectLatLng.y });
     
             clickedLocUI.current.style.display = 'inline';
     

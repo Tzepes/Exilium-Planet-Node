@@ -125,7 +125,7 @@ useEffect(() => {
               )}
             </Tabs.Content>
 
-            <Tabs.Content className="TabsContent" value="tab3">
+            <Tabs.Content className="TabsContent" value="tab3"> 
               <h3>Parcel Information</h3>
               {closestParcel ? (
                 <>
