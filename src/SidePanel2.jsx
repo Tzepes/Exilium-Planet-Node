@@ -105,7 +105,7 @@ useEffect(() => {
                 ownsParcel ?(
                   <>
                     <h3>Parcel Information</h3>
-                    <p className='Text'><strong>Location</strong> {parcel.longitude}, {parcel.latitude}</p>
+                    <p className='Text'><strong>Location</strong> {parcel.latitude}, {parcel.longitude}</p>
                     <p className='Text'><strong>Resources</strong></p>
                     <ResourcesTable parcelInfo={parcel}/>
                     <p></p>
@@ -134,7 +134,7 @@ useEffect(() => {
                       <p className='Text'><strong>Owner</strong> {closestParcel.ownerUsername}</p>
                       <p className='Text'><strong>Parcel ID</strong> {closestParcel.id}</p>
                       <p className='Text'><strong>Ethereum Address</strong> {closestParcel.ownerEthAddress}</p>
-                      <p className='Text'><strong>Location</strong> {closestParcel.longitude}, {closestParcel.latitude}</p>
+                      <p className='Text'><strong>Location</strong> {closestParcel.latitude}, {closestParcel.longitude}</p>
                       <ResourcesTable parcelInfo={closestParcel}/>
                       <p></p>
                       <p className='Text'><strong>Value</strong> {closestParcel.ethValue} ETH</p>
@@ -142,7 +142,7 @@ useEffect(() => {
                   ) : (
                     <>
                       <Text as="p"><strong>Parcel ID:</strong> {closestParcel.id}</Text>
-                      <Text as="p"><strong>Location:</strong> {closestParcel.longitude}, {closestParcel.latitude}</Text>
+                      <Text as="p"><strong>Location:</strong> {closestParcel.latitude}, {closestParcel.longitude},</Text>
                       <Text as="p"><strong>Ether Value:</strong> {closestParcel.ethValue}</Text>
                       <Text as="h2">This parcel has no owner</Text>
                       <Button onClick={() => handleBuyParcel(wallet, user, closestParcel, setOwnsParcel)}>Buy for {closestParcel.ethValue}</Button>

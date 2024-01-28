@@ -13,9 +13,11 @@ import loadingFragment from './shaders/loadingFragment.glsl'
 import {HomeIcon, SewingPinFilledIcon} from '@radix-ui/react-icons'
 
 import axios from 'axios'
+import {wallet} from './utils/metamaskConnect'
 import { sphereCoords, getLatLng } from './utils/sphericalCoords.js'
 
 import SurfaceIcon from './SurfaceIcon.jsx'
+import { set } from 'mongoose'
 
 extend({ OrbitControls: OrbitControls})
 
@@ -26,6 +28,7 @@ extend({ OrbitControls: OrbitControls})
 
 export default function Experience({  }) {
     const [parcelMatrix, setParcelMatrix] = useState([]);
+    const [onwedParcel, setOwnedParcel] = useState({lat: 0, lng: 0});
 
     const totalParcels = 99856;
     const parcelsPerSide = Math.sqrt(totalParcels);
@@ -40,6 +43,7 @@ export default function Experience({  }) {
         const fetchData = async () => {
             try {
                 const getParcels = await axios.get('http://localhost:3000/api/parcels');
+                const getOwnedParcel = await axios.get(`http://localhost:3000/api/parcels/${wallet.accounts[0]}`);
                 
                 // Create a new matrix filled with null values
                 const newMatrix = new Array(316).fill(null).map(() => new Array(316).fill(null));
@@ -51,11 +55,14 @@ export default function Experience({  }) {
                 }
 
                 setParcelMatrix(newMatrix);
+                setOwnedParcel(getOwnedParcel.data[0]);
+                console.log(onwedParcel);
                 
             } catch (error) {
                 console.error(error);
             }
         }
+        console.log(onwedParcel);
 
         fetchData();
     }, []);
@@ -134,9 +141,18 @@ export default function Experience({  }) {
     }
 
     //BaseLocMesh
-    let baseLat = 44.4379186;
-    let baseLng = 26.0120663;
+    let baseLat = 0; // apply onwedParcel.latitude
+    let baseLng = 0;
+    
     let playerBaseLocation = sphereCoords(baseLat, baseLng, radius);
+
+    useEffect(() => {
+        if(onwedParcel){
+            baseLat = onwedParcel.latitude;
+            baseLng = onwedParcel.longitude;
+            playerBaseLocation = sphereCoords(baseLat, baseLng, radius);
+        }
+    }, [onwedParcel])
 
     //Events
     const clickedLocMesh = useRef()
@@ -253,7 +269,7 @@ export default function Experience({  }) {
             <sphereGeometry args={[0.5, 4, 4]}/>
             <meshBasicMaterial/>
             <Html ref={baseLocUI} wrapperClass="locationUI">
-                <SurfaceIcon lat={baseLat} lng={baseLng} IconComponent={HomeIcon} parcelType={"Owned Parcel"}/>                       
+                <SurfaceIcon ownedParcel={onwedParcel} IconComponent={HomeIcon} parcelType={"Owned Parcel"}/>                       
             </Html>
         </mesh>
 
