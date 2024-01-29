@@ -3,14 +3,22 @@ import * as Form from '@radix-ui/react-form';
 import './Form.css';
 
 import {handleUsernameSubmit} from './utils/apis';
+import { set } from 'mongoose';
 
 function FormConnect ({wallet, setUser, setParcel, setOwnsParcel}) {
+  const [submit, setSubmit] = useState(false);
+
+  async function fetchUser(event) {
+    await handleUsernameSubmit(event, event.target[0].value, wallet, setUser, setParcel, setOwnsParcel);
+  }
 
   return(
     <>
       <Form.Root className="FormRoot" 
               onSubmit={(event) => {
-                handleUsernameSubmit(event, event.target[0].value, wallet, setUser, setParcel, setOwnsParcel);
+                setSubmit(true);
+                fetchUser(event);
+                setSubmit(true);
               }}>
         <Form.Field className="FormField" name="name">
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
@@ -25,7 +33,7 @@ function FormConnect ({wallet, setUser, setParcel, setOwnsParcel}) {
         </Form.Field>
         <Form.Submit asChild>
           <button className="Button" style={{ marginTop: 10 }}>
-            Submit
+            {submit ? 'Submitting...' : 'Submit'}
           </button>
         </Form.Submit>
       </Form.Root>

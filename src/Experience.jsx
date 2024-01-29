@@ -28,7 +28,7 @@ extend({ OrbitControls: OrbitControls})
 
 export default function Experience({ setClosestParcel }) {
     const [parcelMatrix, setParcelMatrix] = useState([]);
-    const [onwedParcel, setOwnedParcel] = useState({lat: 0, lng: 0});
+    const [ownedParcel, setOwnedParcel] = useState({latitude: 0, longitude: 0});
 
     const totalParcels = 99856;
     const parcelsPerSide = Math.sqrt(totalParcels);
@@ -89,7 +89,6 @@ export default function Experience({ setClosestParcel }) {
     //Loading Manager
     const loadingOverlay = useRef();
     const htmlLoadingOverlay = useRef();
-    const loadingBGSIcon = document.querySelector('.loadingContainer')
     let loaded = false;
 
     const loadingUniforms = {
@@ -106,10 +105,11 @@ export default function Experience({ setClosestParcel }) {
             controls.enabled = true;
             
             loaded = true;
+            console.log(loaded);
         },
         //Progress
         () => {
-            //loadingBGSIcon.style.display = 'inline';
+            console.log("loading ");
         }
     )
     
@@ -139,18 +139,18 @@ export default function Experience({ setClosestParcel }) {
     }
 
     //BaseLocMesh
-    let baseLat = 0; // apply onwedParcel.latitude
+    let baseLat = 0; // apply ownedParcel.latitude
     let baseLng = 0;
     
-    let playerBaseLocation = sphereCoords(baseLat, baseLng, radius);
+    let playerBaseLocation = sphereCoords(ownedParcel.latitude, ownedParcel.longitude, radius);
 
     useEffect(() => {
-        if(onwedParcel){
-            baseLat = onwedParcel.latitude;
-            baseLng = onwedParcel.longitude;
+        if(ownedParcel){
+            baseLat = ownedParcel.latitude;
+            baseLng = ownedParcel.longitude;
             playerBaseLocation = sphereCoords(baseLat, baseLng, radius);
         }
-    }, [onwedParcel])
+    }, [ownedParcel])
 
     //Events
     const clickedLocMesh = useRef()
@@ -162,10 +162,11 @@ export default function Experience({ setClosestParcel }) {
     
     const planetClick = (event) => 
     {
+        console.log("click");
         if(loaded){
             const vectLatLng = getLatLng(event.point.x, event.point.y, event.point.z)
             const vect3D = sphereCoords(vectLatLng.x, vectLatLng.y, radius+0.2);
-
+            console.log(vectLatLng);
             let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y);
             setClosestParcel(closestParcel)
 
@@ -267,7 +268,7 @@ export default function Experience({ setClosestParcel }) {
             <sphereGeometry args={[0.5, 4, 4]}/>
             <meshBasicMaterial/>
             <Html ref={baseLocUI} wrapperClass="locationUI">
-                <SurfaceIcon ownedParcel={onwedParcel} IconComponent={HomeIcon} parcelType={"Owned Parcel"}/>                       
+                {ownedParcel && <SurfaceIcon ownedParcel={ownedParcel} IconComponent={HomeIcon} parcelType={"Owned Parcel"}/>}   
             </Html>
         </mesh>
 

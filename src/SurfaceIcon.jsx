@@ -6,7 +6,7 @@ import '@radix-ui/themes/styles.css';
 import './SurfaceIcon.css'
 
 function SurfaceIcon({lat, lng, ownedParcel, IconComponent, parcelType, children}) {
-  const [ownedParcelLoc, setOwnedParcelLoc] = useState({lat: 0, lng: 0})
+  const [ownedParcelLoc, setOwnedParcelLoc] = useState({latitude: 0, longitude: 0})
 
   useEffect(() => {
     setOwnedParcelLoc(ownedParcel)
@@ -23,8 +23,8 @@ function SurfaceIcon({lat, lng, ownedParcel, IconComponent, parcelType, children
             <div className="Text bold"><strong>{parcelType}</strong></div>
             {parcelType === "Owned Parcel" ? (
               <>
-                <Text as="p" mb="5" size="3">Latitude: {ownedParcelLoc.latitude}</Text> 
-                <Text as="p" mb="5" size="3">Longitude: {ownedParcelLoc.longitude}</Text>
+                {ownedParcelLoc.latitude !== undefined && <Text as="p" mb="5" size="3">Latitude: {ownedParcelLoc.latitude}</Text>}
+                {ownedParcelLoc.longitude !== undefined && <Text as="p" mb="5" size="3">Longitude: {ownedParcelLoc.longitude}</Text>}
               </>
             ) : (
               <>

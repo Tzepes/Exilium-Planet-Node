@@ -12,7 +12,7 @@ import ResourcesTable from './ResourcesTable';
 import FormConnect from './FormConnect';
 
 import {handleConnect, wallet} from './utils/metamaskConnect'
-import { connectToMetamask, handleUsernameSubmit, fetchUser, fetchownsParcel, handleBuyParcel } from './utils/apis';
+import { connectToMetamask, fetchUser, fetchownsParcel, handleBuyParcel } from './utils/apis';
 
 function SidePanel2({closestParcel}) {
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -49,14 +49,12 @@ function SidePanel2({closestParcel}) {
 
 connectToMetamask(handleConnect, setMetamaskConnection);
 
-// handleUsernameSubmit(user, wallet, setUser, setParcel); //add this to the form submit
-
 useEffect(() => {
   if (wallet && wallet.accounts[0]) {
       fetchUser(wallet, setUser, setParcel, setMetamaskConnection);
       fetchownsParcel(wallet, setParcel, setOwnsParcel);
   }
-}, [wallet.accounts]);
+}, [wallet]);
 
   return (
     <>

@@ -65,8 +65,7 @@ app.put("/api/parcels/:id", async (req, res) => { // Update parcel owner
     await parcel.save();
     await user.save();
     
-    res.status(200).json(parcel);
-    res.status(200).json(user);
+    res.status(200).json({parcel, user});
   } catch (error) {
     res.status(500).json({ error: error });
   }
