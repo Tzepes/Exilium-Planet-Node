@@ -2,12 +2,12 @@ import ParcelModel from "../models/parcelSchema.js";
 import UserModel from "../models/metamaskAccSchema.js";
 
 export const getParcels = async (req, res) => {
-    try {
-        const parcels = await ParcelModel.find({});
-        res.json(parcels);
-      } catch (error) {
-        res.status(500).json({ error: error });
-      }
+  try {
+      const parcels = await ParcelModel.find({});
+      res.json(parcels);
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
 };
 
 export const getParcelsByOwner = async (req, res) => {
