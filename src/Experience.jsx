@@ -14,10 +14,9 @@ import {HomeIcon, SewingPinFilledIcon} from '@radix-ui/react-icons'
 
 import axios from 'axios'
 import {wallet} from './utils/metamaskConnect'
-import { sphereCoords, getLatLng } from './utils/sphericalCoords.js'
+import { sphereCoords, getLatLng, getClosestParcel, OrientObjectOnSphere } from './utils/sphericalCoords.js'
 
 import SurfaceIcon from './SurfaceIcon.jsx'
-import { set } from 'mongoose'
 
 extend({ OrbitControls: OrbitControls})
 
@@ -29,15 +28,6 @@ extend({ OrbitControls: OrbitControls})
 export default function Experience({ setClosestParcel }) {
     const [parcelMatrix, setParcelMatrix] = useState([]);
     const [ownedParcel, setOwnedParcel] = useState({latitude: 0, longitude: 0});
-
-    const totalParcels = 99856;
-    const parcelsPerSide = Math.sqrt(totalParcels);
-
-    const latRange = 180; // from -90 to 90
-    const lonRange = 360; // from -180 to 180
-
-    const latStep = latRange / parcelsPerSide;
-    const lonStep = lonRange / parcelsPerSide;
 
     useEffect(() => { // ramane aici
         const fetchData = async () => {
@@ -64,20 +54,6 @@ export default function Experience({ setClosestParcel }) {
 
         fetchData();
     }, []);
-
-    function getClosestParcel(lat, lon) { // separa asta in alt fisier
-        // Calculate the index of the parcel that should be closest to the given coordinates
-        let i = Math.floor(lat / latStep);
-        let j = Math.floor(lon / lonStep);
-        let index = i * parcelsPerSide + j;
-
-        // Flatten the parcelMatrix into a 1D array
-        let flatParcelMatrix = parcelMatrix.flat();
-        // setClosestParcel(flatParcelMatrix[index]);
-        // console.log(closestParcel);
-        // Return the parcel at the calculated index
-        return flatParcelMatrix[index];
-    }
 
     //Camera
     const {camera, gl, scene} = useThree()
@@ -142,7 +118,8 @@ export default function Experience({ setClosestParcel }) {
     let baseLat = 0; // apply ownedParcel.latitude
     let baseLng = 0;
     
-    let playerBaseLocation = sphereCoords(ownedParcel.latitude, ownedParcel.longitude, radius);
+    let playerBaseLocation = sphereCoords(ownedParcel.latitude, ownedParcel.longitude, radius); // sometimes the ownedParcel isn't updated in time
+                                                                                                // causing "latitude not defined" error
 
     useEffect(() => {
         if(ownedParcel){
@@ -162,12 +139,11 @@ export default function Experience({ setClosestParcel }) {
     
     const planetClick = (event) => 
     {
-        console.log("click");
         if(loaded){
             const vectLatLng = getLatLng(event.point.x, event.point.y, event.point.z)
             const vect3D = sphereCoords(vectLatLng.x, vectLatLng.y, radius+0.2);
-            console.log(vectLatLng);
-            let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y);
+
+            let closestParcel = getClosestParcel(vectLatLng.x, vectLatLng.y, parcelMatrix);
             setClosestParcel(closestParcel)
 
             setClickedLoc({ lat: vectLatLng.x, lng: vectLatLng.y });
@@ -177,6 +153,10 @@ export default function Experience({ setClosestParcel }) {
             clickedLocMesh.current.position.set(vect3D.x, vect3D.y, vect3D.z);
             OrientObjectOnSphere(clickedLocMesh, vect3D.x, vect3D.y, vect3D.z);
         }
+    }
+
+    function cameraDistToOrg() {
+        return Math.sqrt(camera.position.x * camera.position.x + camera.position.y * camera.position.y + camera.position.z * camera.position.z)
     }
 
     window.addEventListener("wheel", (event) => {
@@ -191,15 +171,6 @@ export default function Experience({ setClosestParcel }) {
         controls.current.rotateSpeed = (cameraDistToOrg() - 20) / 50;
     });
 
-    function cameraDistToOrg() {
-        return Math.sqrt(camera.position.x * camera.position.x + camera.position.y * camera.position.y + camera.position.z * camera.position.z)
-    }
-
-    function OrientObjectOnSphere(object, objX, objY, objZ){
-        const normalVectors = new THREE.Vector3(objX, objY, objZ).normalize();
-        object.current.lookAt(object.current.position.clone().add(normalVectors));
-    }
-    
     useFrame((state, delta) =>{
         planetRef.current.rotation.y += 0.01 * delta;
         cloudsRef.current.rotation.y += 0.02 * delta;
