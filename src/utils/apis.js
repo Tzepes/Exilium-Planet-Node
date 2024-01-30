@@ -60,7 +60,7 @@ export async function fetchownsParcel(wallet, setParcel, setOwnsParcel) {
             setOwnsParcel(false);
         }
     } catch (error) {
-        console.log('Something went wrong. Please try again.');
+        console.log('Something went wrong. Please try again.', error);
     }
 }
 
@@ -81,9 +81,9 @@ export async function handleBuyParcel(wallet, user, closestParcel, setParcel, se
               setParcel(response.data);
               fetchownsParcel(wallet, setParcel, setOwnsParcel);
           } else {
-              console.log('Something went wrong. Please try again.');
+              console.log('Something went wrong.', error);
           }
       } catch (error) {
-          console.log('Something went wrong. Please try again.');
+          console.log('Something went wrong.', error);
       }
 }

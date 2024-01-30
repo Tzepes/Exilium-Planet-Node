@@ -46,6 +46,7 @@ export default function Experience({ setClosestParcel }) {
 
                 setParcelMatrix(newMatrix);
                 setOwnedParcel(getOwnedParcel.data[0]);
+                console.log(getOwnedParcel.data);
                 
             } catch (error) {
                 console.error(error);
@@ -117,8 +118,8 @@ export default function Experience({ setClosestParcel }) {
     //BaseLocMesh
     let baseLat = 0; // apply ownedParcel.latitude
     let baseLng = 0;
-    
-    let playerBaseLocation = sphereCoords(ownedParcel.latitude, ownedParcel.longitude, radius); // sometimes the ownedParcel isn't updated in time
+    let playerBaseLocation = sphereCoords(baseLat, baseLng, radius);
+    //let playerBaseLocation = sphereCoords(ownedParcel.latitude, ownedParcel.longitude, radius); // sometimes the ownedParcel isn't updated in time
                                                                                                 // causing "latitude not defined" error
 
     useEffect(() => {
