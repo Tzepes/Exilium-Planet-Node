@@ -1,4 +1,7 @@
 import axios from 'axios';
+import web3 from './web3';
+import {ethers} from 'ethers';
+import exl_contract from './exiliumland-contract';
 
 export async function connectToMetamask(handleConnect, setMetamaskConnection) {
   try {
@@ -75,15 +78,28 @@ export async function handleBuyParcel(wallet, user, closestParcel, setParcel, se
               username: user.username,
               ethereumAddress: wallet.accounts[0],
           });
-          
-          if (response.status === 200) {
-              console.log('Parcel bought successfully!');
-              setParcel(response.data);
-              fetchownsParcel(wallet, setParcel, setOwnsParcel);
-          } else {
-              console.log('Something went wrong.', error);
-          }
+
+          mintToken(wallet).then((receipt) => {
+            if (receipt.status === 200 && response.status === 200) {
+                console.log('Parcel bought successfully!');
+                setParcel(response.data);
+                fetchownsParcel(wallet, setParcel, setOwnsParcel);
+            }
+          }).catch((error) => { 
+                console.log('Something went wrong.', error);
+          });
       } catch (error) {
           console.log('Something went wrong.', error);
       }
+}
+
+async function mintToken(wallet) {
+    const uri = 'https://white-cheerful-dormouse-841.mypinata.cloud/ipfs/QmQhkgdPsehHhwVpkLGjtcXjrkGWwNXY8uv4KnrVbPk9kZ';
+    
+    try {
+        const receipt = await exl_contract.methods.safeMint(wallet.accounts[0], uri, 1, 1).send({ from: '0xE29eA2e0b5E7192956c8D38B0F66313D8B95D324' });
+        return receipt;
+    } catch (error) {
+        console.error('Error minting token:', error);
+    }
 }
