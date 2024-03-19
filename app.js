@@ -8,9 +8,9 @@ import mongoose from "mongoose";
 import parcelRoutes from "./routes/parcelsRoutes.js";
 import userRoutes from "./routes/usersRoutes.js";
 
-const mongoPassword = fs.readFileSync(".mongoPassword", "utf8");
+const mongoURI = fs.readFileSync(".mongoURI", "utf8");
 
-mongoose.connect(`mongodb+srv://Andrei:${mongoPassword}@cluster0.nft1mwd.mongodb.net/exiliumParcels?retryWrites=true&w=majority&appName=Cluster0`)
+mongoose.connect(`${mongoURI}`)
   .then(() => console.log("Connected to MongoDB from Exilium Planet Node..."))
   .catch((err) => console.log("Error connecting to MongoDB from Exilium Planet Node | " + err));
 
